@@ -1,8 +1,9 @@
 import urllib.request
 import json
 import sys, getopt
-from datetime import datetime
+from datetime import datetime, timedelta, date
 import config
+import os
 
 def requestQuotes(symbols):
     req = urllib.request.Request("https://sandbox.tradier.com/v1/markets/quotes?symbols=%s" % (symbols))
@@ -13,6 +14,12 @@ def requestQuotes(symbols):
 
 def writeData(symbols):
     filename = "C:\\Users\\cduggan\\workspace\\stocks\\gaps.stk"
+
+    # if file exists, assume it is yesterday's and move it
+    if os.path.isfile(filename):
+        yesterday = date.today() - timedelta(days=1)
+        os.rename(filename, "C:\\Users\\cduggan\\workspace\\stocks\\data\\" + str(yesterday) + "_gaps.stk")
+
     target = open(filename, 'w')
     target.truncate()
     target.write(symbols)
