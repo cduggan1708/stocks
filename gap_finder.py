@@ -5,6 +5,9 @@ from datetime import datetime, timedelta, date
 import config
 import os
 
+FILENAME = "gaps.stk"
+FILE_DIR = "C:\\Users\\cduggan\\workspace\\stocks\\"
+
 def requestQuotes(symbols):
     req = urllib.request.Request("https://sandbox.tradier.com/v1/markets/quotes?symbols=%s" % (symbols))
     req.add_header('Accept', 'application/json')
@@ -13,12 +16,12 @@ def requestQuotes(symbols):
     return response.read().decode('utf-8')
 
 def writeData(symbols):
-    filename = "C:\\Users\\cduggan\\workspace\\stocks\\gaps.stk"
+    filename = FILE_DIR + FILENAME
 
-    # if file exists, assume it is yesterday's and move it
+    # if file exists, rename it using the modify date and move it to data directory
     if os.path.isfile(filename):
-        yesterday = date.today() - timedelta(days=1)
-        os.rename(filename, "C:\\Users\\cduggan\\workspace\\stocks\\data\\" + str(yesterday) + "_gaps.stk")
+        modify_date = date.fromtimestamp(os.path.getmtime(filename))
+        os.rename(filename, FILE_DIR + "data\\" + str(modify_date) + "_" + FILENAME)
 
     target = open(filename, 'w')
     target.truncate()
