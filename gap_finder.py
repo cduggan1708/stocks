@@ -73,11 +73,11 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, "hsp:f:")
     except:
-        print('test.py -s <CSV of symbols> -p <gap percentage> -f <stocks filename>')
+        print('gap_finder.py -s <CSV of symbols> -p <gap percentage> -f <stocks filename>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('test.py -s <CSV of symbols> -p <gap percentage> -f <stocks filename>')
+            print('gap_finder.py -s <CSV of symbols> -p <gap percentage> -f <stocks filename>')
             sys.exit()
         else:
             if opt in ('-s', '--symbols'):
