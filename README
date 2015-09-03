@@ -1,1 +1,6 @@
 README 
+
+note to self: use python -m pip install from git bash
+
+need to install NumPy (manually with .exe)
+need to install pandas (with pip)
