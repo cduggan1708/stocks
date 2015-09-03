@@ -48,7 +48,7 @@ def readYamlResults():
         print("\n")
 
 def main():
-    symbols = 'AAPL,GILD,FB,BRCM,C,CBS,CSCO,CSX,ETFC,GM,GPS,HAL,KO,MRK,MS,NOV,QID,SBUX,USO,VZ,WFM,X,XLNX'
+    symbols = 'AAPL,GILD,FB,BRCM,C,CBS,CSCO,CSX,ETFC,GM,GPS,HAL,KO,MRK,MS,NOV,QID,SBUX,USO,VZ,WFM,X,XLNX,SUNE'
     data = parseQuotes(requestQuotes(symbols))
     writeData(data)
 
