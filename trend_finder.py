@@ -46,20 +46,21 @@ def writeData(symbol, trend):
     target.write("\n")
     target.close()
 
-def determineTrend(symbol, current_price, twenty_ma, forty_ma, two_hundred_ma):
+def determineTrend(symbol, twenty_ma, forty_ma, two_hundred_ma):
     # uptrend
-    if current_price > twenty_ma > forty_ma > two_hundred_ma:
+    if twenty_ma > forty_ma > two_hundred_ma:
         writeData(symbol, UPTREND)
-    elif two_hundred_ma > forty_ma > twenty_ma > current_price:
+        print("%s is uptrending" % symbol)
+    elif two_hundred_ma > forty_ma > twenty_ma:
         writeData(symbol, DOWNTREND)
+        print("%s is downtrending" % symbol)
 
 def parseHistory(history, symbol):
     j = json.loads(history)
     if j['history'] == None:
-        print("Cannot get data for %s so skipping" % (symbol))
+        print("%s: cannot get data so skipping" % (symbol))
         return
 
-    current_price = 0
     twenty_ma = 0
     forty_ma = 0
     two_hundred_ma = 0
@@ -80,8 +81,6 @@ def parseHistory(history, symbol):
                 # increment counter (of number of dates we've processed)
                 i += 1
 
-                if i == 1:
-                    current_price = value
                 if i == 20:
                     twenty_ma = total_price / i
                 if i == 40:
@@ -93,9 +92,8 @@ def parseHistory(history, symbol):
     if two_hundred_ma == 0:
         print("%s: do not have 200 prices so using what we have, which is %d prices" % (symbol, i))
         two_hundred_ma = total_price / i
-    
-    print(symbol, current_price, twenty_ma, forty_ma, two_hundred_ma)
-    determineTrend(symbol, current_price, twenty_ma, forty_ma, two_hundred_ma)
+
+    determineTrend(symbol, twenty_ma, forty_ma, two_hundred_ma)
 
 def readSymbolsFromFile(filename):
     target = open(filename, 'r')
