@@ -5,6 +5,7 @@ import os
 import inspect
 import yaml
 from datetime import date
+from datetime import datetime
 import config
 
 YAML_FILENAME = '\\data\\' + str(date.today()) + '_stock_data.yml'
