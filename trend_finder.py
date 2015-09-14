@@ -17,9 +17,9 @@ UPTREND = "up"
 DOWNTREND = "down"
 
 def getStartDate():
-    # get 200 business days since yesterday
+    # get 200 business days since yesterday but leave room in case this is run on weekend
     yesterday = date.today() - timedelta(days=1)
-    start_date = yesterday - BDay(200)
+    start_date = yesterday - BDay(202)
 
     # find the number of holidays between yesterday and 200 days ago and subtract that to get real start date
     calendar = USFederalHolidayCalendar()
@@ -37,23 +37,24 @@ def requestHistory(symbol, start_date):
     response = urllib.request.urlopen(req)
     return response.read().decode('utf-8')
 
-def writeData(symbol, trend):
+def writeData(symbols, trend):
     filename = FILE_DIR + '_' + trend + '_' + FILENAME
 
-    target = open(filename, 'a')
+    target = open(filename, 'w')
     target.truncate()
-    target.write(symbol)
+    target.write(symbols)
     target.write("\n")
     target.close()
 
 def determineTrend(symbol, twenty_ma, forty_ma, two_hundred_ma):
+    # TODO get weekly and only if in up/down trend on both add to list?
     # uptrend
     if twenty_ma > forty_ma > two_hundred_ma:
-        writeData(symbol, UPTREND)
         print("%s is uptrending" % symbol)
+        return dict(UPTREND=symbol)
     elif two_hundred_ma > forty_ma > twenty_ma:
-        writeData(symbol, DOWNTREND)
         print("%s is downtrending" % symbol)
+        return dict(DOWNTREND=symbol)
 
 def parseHistory(history, symbol):
     j = json.loads(history)
@@ -93,7 +94,7 @@ def parseHistory(history, symbol):
         print("%s: do not have 200 prices so using what we have, which is %d prices" % (symbol, i))
         two_hundred_ma = total_price / i
 
-    determineTrend(symbol, twenty_ma, forty_ma, two_hundred_ma)
+    return determineTrend(symbol, twenty_ma, forty_ma, two_hundred_ma)
 
 def readSymbolsFromFile(filename):
     target = open(filename, 'r')
@@ -123,17 +124,31 @@ def main(argv):
     print("%s: Executed trend_finder.py" % datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     
     start_date = getStartDate()
+    uptrend_symbols = []
+    downtrend_symbols = []
     for symbol in symbols:
         # if we fail, try up to 2 more times
         for attempt in range(2):
             try:
-                parseHistory(requestHistory(symbol, start_date), symbol)
+                trend = parseHistory(requestHistory(symbol, start_date), symbol)
+                if trend is not None:
+                    t = list(trend.keys())[0]
+                    s = list(trend.values())[0]
+                    if t == 'DOWNTREND':
+                        downtrend_symbols.append(s)
+                    if t == 'UPTREND':
+                        uptrend_symbols.append(s)
             except (urllib.error.HTTPError):
                 print('Rate limit hit; sleeping for 1 minute')
                 time.sleep(60)
             else:
                 break
+
     
+    if uptrend_symbols != []:
+        writeData("\n".join(uptrend_symbols), UPTREND)
+    if downtrend_symbols != []:
+        writeData("\n".join(downtrend_symbols), DOWNTREND)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
